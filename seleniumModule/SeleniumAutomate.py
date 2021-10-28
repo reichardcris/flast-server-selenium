@@ -9,11 +9,22 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.remote.webelement import WebElement as element
-
+from dotenv import load_dotenv
 class SeleniumAutomate:
 
   def __init__(self, pdf_path = '', pages = [], docs = {}):
     print("__INIT__ PDF PATH")
+    load_dotenv()
+
+    # user creds
+
+    self.user_name = os.getenv("HELLOSIGN_USERNAME")
+    self.password = os.getenv("HELLOSIGN_PASSWORD")
+    if (not self.user_name and not self.password):
+      self.setStatus(401)
+      return
+
+    # pdf directory setup
     self.pdf_path = pdf_path
     self.pages = pages
     self.docs = docs
@@ -45,6 +56,14 @@ class SeleniumAutomate:
 
     self.adjustZoomLevel(driver)
     self.finalStep(driver)
+    self.setStatus()
+
+  
+  def setStatus(self, stat = 200):
+    self.STATUS = stat
+  
+  def getStatus(self):
+    return 'ok' if self.STATUS == 200 else 'Invalid Username Or Password', self.STATUS
 
   def findElementByXPath(self, driver, element = ''):
     print('elemntehere', element)
@@ -121,14 +140,26 @@ class SeleniumAutomate:
     zoom_select.click()
 
   def finalStep(self, driver):
-    for page_coordinates in self.pages:
-      page_no = page_coordinates['page']
-      pager = self.findElementByXPath(driver, f'//*[@id="root"]/div/div/div[3]/div[2]/div/div/div/div/div[@id="page-{page_no}"]/div/div/img')
-      pager.click()
-      time.sleep(2)
+    page_counter = 0
+    bounds = None
+    xOffset = None
+    yOffset = None
+    img_page = None
 
-      img_page = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div/img')
-      bounds = driver.execute_script(f"return document.evaluate('//*[@id=\"page-{page_no}\"]/div/div/img', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.getBoundingClientRect()")
+    for page_coordinates in self.pages:
+      if page_counter != page_coordinates['page']:
+        print('page_coordinates')
+        print(page_coordinates)
+        page_no = page_coordinates['page']
+        pager = self.findElementByXPath(driver, f'//*[@id="root"]/div/div/div[3]/div[2]/div/div/div/div/div[@id="page-{page_no}"]/div/div/img')
+        print('pager_pager_pager')
+        print(pager)
+        pager.click()
+        time.sleep(2)
+        img_page = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div/img')
+        bounds = driver.execute_script(f"return document.evaluate('//*[@id=\"page-{page_no}\"]/div/div/img', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.getBoundingClientRect()")
+        
+
       xOffset = page_coordinates['x'] * bounds['width']
       yOffset = page_coordinates['y'] * bounds['height']
 
@@ -136,25 +167,32 @@ class SeleniumAutomate:
       print(f'xOffsetxOffset----     {xOffset}')
       print(f'yOffsetyOffset----     {yOffset}')
 
+      # if page_counter == 1:
       action = ActionChains(driver)
       action.move_to_element_with_offset(img_page, xOffset, yOffset).click().perform()
+      time.sleep(1)
       action.reset_actions()
+      action.move_to_element_with_offset(img_page, 5, 5).click().perform()
       for device in action.w3c_actions.devices:
+        print('devices devices devices devices')
+        print(device)
         device.clear_actions()
       
-      # driver.switch_to.parent_frame()
-      # next_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div/nav/div[2]/button[2]')
-      # next_btn.click()
+      page_counter = page_coordinates['page']
+      
+    driver.switch_to.parent_frame()
+    next_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div/nav/div[2]/button[2]')
+    next_btn.click()
 
-      # document_sender_first_name = self.findElementByXPath(driver, '//*[@id="document.firstname"]')
-      # document_sender_first_name.send_keys(self.docs['sender_first_name'])
+    # document_sender_first_name = self.findElementByXPath(driver, '//*[@id="document.firstname"]')
+    # document_sender_first_name.send_keys(self.docs['sender_first_name'])
 
-      # document_sender_last_name = self.findElementByXPath(driver, '//*[@id="document.lastname"]')
-      # document_sender_last_name.send_keys(self.docs['sender_last_name'])
+    # document_sender_last_name = self.findElementByXPath(driver, '//*[@id="document.lastname"]')
+    # document_sender_last_name.send_keys(self.docs['sender_last_name'])
 
-      # document_title = self.findElementByXPath(driver, '//*[@id="document.title"]')
-      # document_title.send_keys(self.docs['document_title'])
+    document_title = self.findElementByXPath(driver, '//*[@id="document.title"]')
+    document_title.send_keys(self.docs['document_title'])
 
-      # send_signature_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[2]/nav/div[2]/button[2]')
-      # send_signature_btn.click()
-      # driver.quit()
+    send_signature_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[2]/nav/div[2]/button[2]')
+    send_signature_btn.click()
+    driver.quit()

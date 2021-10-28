@@ -10,7 +10,8 @@ def automate():
   if request.method == 'POST':
     pages = json.loads(request.form['page_location'])
     docs = json.loads(request.form['docs_info'])
-    SeleniumAutomate(request.form['path'], pages, docs)
-    return request.form
-  return request.form
+    status = SeleniumAutomate(request.form['path'], pages, docs).getStatus()
+    return status
+
+  return 'Something went wrong! please try again...', 500
 
