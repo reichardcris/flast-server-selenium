@@ -113,6 +113,10 @@ class SeleniumAutomate:
     sign_doc_btn = self.findElementByXPath(driver, '//*[@id="site-wrapper"]/main/div/div[2]/div/a[1]')
     sign_doc_btn.click()
 
+    hasModalQuota = self.waitElement(driver, '/html/body/div[10]/div/div/div[@class="hello-modal"]')
+    if (type(hasModalQuota) is element):
+      self.findElementByXPath(driver, '/html/body/div[10]/div/div/div/div[3]/div/button').click()
+
     file_dir = self.pdf_path
     file_input = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div/div[1]/div[1]/span/input')
     file_input.send_keys(file_dir)
@@ -140,7 +144,7 @@ class SeleniumAutomate:
     zoom_select.click()
 
   def finalStep(self, driver):
-    page_counter = 0
+    page_counter = None
     bounds = None
     xOffset = None
     yOffset = None
