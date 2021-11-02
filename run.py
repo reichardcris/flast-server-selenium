@@ -5,6 +5,14 @@ import json
 
 app = Flask(__name__)
 
+@app.route('/',methods = ['POST', 'GET'])
+def root():
+  return 'Welcome to python selenium!', 200
+
+@app.route('/test',methods = ['POST', 'GET'])
+def test():
+  return 'All goood to python selenium!', 200
+
 @app.route('/automate',methods = ['POST', 'GET'])
 def automate():
   if request.method == 'POST':
