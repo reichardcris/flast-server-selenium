@@ -1,3 +1,4 @@
 /__pycache__
 /seleniumModule/__pycache__
 /seleniumModule/.env
+geckodriver.log
