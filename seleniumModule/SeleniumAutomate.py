@@ -1,14 +1,16 @@
 import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.chrome.options import Options
+# from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.firefox.options import Options
 from fake_useragent import UserAgent
 import time
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.remote.webelement import WebElement as element
+# from selenium.webdriver.remote.webelement import WebElement as element
+from selenium.webdriver.firefox.webelement import FirefoxWebElement as element
 from dotenv import load_dotenv
 class SeleniumAutomate:
 
@@ -29,10 +31,12 @@ class SeleniumAutomate:
     self.pages = pages
     self.docs = docs
     dir = os.path.dirname(__file__)
-    chrome_driver_path = dir + "\chromedriver.exe"
-    driver = webdriver.Chrome(chrome_options = self.chromeOptions(), executable_path = chrome_driver_path)
+    # chrome_driver_path = dir + "\chromedriver.exe"
+    chrome_driver_path = dir + "\geckodriver.exe"
+    driver = webdriver.Firefox(options = self.chromeOptions(), executable_path = chrome_driver_path)
+    driver.maximize_window()
     driver.implicitly_wait(30)
-    driver.execute_cdp_cmd('Network.setUserAgentOverride', {"userAgent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36'})
+    # driver.execute_cdp_cmd('Network.setUserAgentOverride', {"userAgent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36'})
     driver.get('https://app.hellosign.com/account/logIn')
 
 
@@ -66,7 +70,6 @@ class SeleniumAutomate:
     return 'ok' if self.STATUS == 200 else 'Invalid Username Or Password', self.STATUS
 
   def findElementByXPath(self, driver, element = ''):
-    print('elemntehere', element)
     element = driver.find_element_by_xpath(element)
     return element
 
@@ -84,11 +87,12 @@ class SeleniumAutomate:
 
   def chromeOptions(self):
     options = Options()
-    options.add_argument("--start-maximized")
-    options.add_argument("--disable-blink-features")
-    options.add_argument('--disable-blink-features=AutomationControlled')
-    options.add_argument('--disable-gpu')
-    options.add_argument('--no-sandbox')
+    options.add_argument('--webdriver-active')
+    # options.add_argument("--start-maximized")
+    # options.add_argument("--disable-blink-features")
+    # options.add_argument('--disable-blink-features=AutomationControlled')
+    # options.add_argument('--disable-gpu')
+    # options.add_argument('--no-sandbox')
     return options
 
   # Login System
@@ -114,6 +118,8 @@ class SeleniumAutomate:
     sign_doc_btn.click()
 
     hasModalQuota = self.waitElement(driver, '/html/body/div[10]/div/div/div[@class="hello-modal"]')
+    print('hasModalQuotahasModalQuotahasModalQuotahasModalQuota')
+    print(hasModalQuota)
     if (type(hasModalQuota) is element):
       self.findElementByXPath(driver, '/html/body/div[10]/div/div/div/div[3]/div/button').click()
 
@@ -142,6 +148,14 @@ class SeleniumAutomate:
     time.sleep(1)
     zoom_select = self.findElementByXPath(driver, '//*[@id="root"]/div/div/div[4]/div[2]/div/ul/li[2]')
     zoom_select.click()
+  
+  def removeAction(self, action):
+    for device in action.w3c_actions.devices:
+      print('Removing ACtions!!')
+      device.clear_actions()
+    
+    return action
+
 
   def finalStep(self, driver):
     page_counter = None
@@ -149,6 +163,7 @@ class SeleniumAutomate:
     xOffset = None
     yOffset = None
     img_page = None
+    signature_file_counter = 0
 
     for page_coordinates in self.pages:
       if page_counter != page_coordinates['page']:
@@ -174,19 +189,40 @@ class SeleniumAutomate:
       # if page_counter == 1:
       action = ActionChains(driver)
       action.move_to_element_with_offset(img_page, xOffset, yOffset).click().perform()
-      time.sleep(1)
+      signature_file_counter = signature_file_counter + 1
+
+      time.sleep(2)
+      print('setting bullet adjustment->->->->->->')
+      # setting bullet adjustment
+      signature_bullet = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div[@data-field="Signature{signature_file_counter}"]/div/div/div/div[4]')
+      signature_bullet_inner = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div[@data-field="Signature{signature_file_counter}"]/div/div/div/div[4]/div')
+      print(signature_bullet)
+      action = self.removeAction(action)
+      action.move_to_element(signature_bullet)
+      action.click_and_hold()
+      action.move_to_element_with_offset(signature_bullet, page_coordinates['w'], page_coordinates['h'])
+
+      try:
+        print('click_sigmatire bullet initiate!')
+        action.click(signature_bullet_inner)
+        action.perform()
+      except Exception as inst:
+        print('Error while clicking!!')
+        action = self.removeAction(action)
+        action.release()
+        action.perform()
+
+      # 
+      # time.sleep(1)
       action.reset_actions()
       action.move_to_element_with_offset(img_page, 5, 5).click().perform()
-      for device in action.w3c_actions.devices:
-        print('devices devices devices devices')
-        print(device)
-        device.clear_actions()
+      self.removeAction(action)
       
       page_counter = page_coordinates['page']
       
-    driver.switch_to.parent_frame()
-    next_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div/nav/div[2]/button[2]')
-    next_btn.click()
+    # driver.switch_to.parent_frame()
+    # next_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div/nav/div[2]/button[2]')
+    # next_btn.click()
 
     # document_sender_first_name = self.findElementByXPath(driver, '//*[@id="document.firstname"]')
     # document_sender_first_name.send_keys(self.docs['sender_first_name'])
@@ -194,9 +230,9 @@ class SeleniumAutomate:
     # document_sender_last_name = self.findElementByXPath(driver, '//*[@id="document.lastname"]')
     # document_sender_last_name.send_keys(self.docs['sender_last_name'])
 
-    document_title = self.findElementByXPath(driver, '//*[@id="document.title"]')
-    document_title.send_keys(self.docs['document_title'])
+    # document_title = self.findElementByXPath(driver, '//*[@id="document.title"]')
+    # document_title.send_keys(self.docs['document_title'])
 
-    send_signature_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[2]/nav/div[2]/button[2]')
-    send_signature_btn.click()
-    driver.quit()
+    # send_signature_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[2]/nav/div[2]/button[2]')
+    # send_signature_btn.click()
+    # driver.quit()
