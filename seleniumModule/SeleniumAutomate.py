@@ -12,6 +12,7 @@ from selenium.webdriver.support import expected_conditions as EC
 # from selenium.webdriver.remote.webelement import WebElement as element
 from selenium.webdriver.firefox.webelement import FirefoxWebElement as element
 from dotenv import load_dotenv
+import json
 class SeleniumAutomate:
 
   def __init__(self, pdf_path = '', pages = [], docs = {}):
@@ -133,11 +134,12 @@ class SeleniumAutomate:
 
   # Recipient Stage
   def addRecipient(self, driver):
-    signer_input_name = self.findElementByXPath(driver, '//*[@id="recipients.0.name"]')
-    signer_input_name.send_keys(self.docs['recepient'])
-
-    signer_input_name = self.findElementByXPath(driver, '//*[@id="recipients.0.email"]')
-    signer_input_name.send_keys(self.docs['email'])
+    for index, val in enumerate(json.loads(self.docs['recepient'])):
+      if (index > 0):
+        time.sleep(1)
+        self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[1]/form/div[3]/div[1]/button').click()
+      self.findElementByXPath(driver, f'//*[@id="recipients.{index}.name"]').send_keys(val['name'])
+      self.findElementByXPath(driver, f'//*[@id="recipients.{index}.email"]').send_keys(val['email'])
 
     next_button = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[2]/nav/div[2]/button[2]')
     next_button.click()
@@ -166,9 +168,12 @@ class SeleniumAutomate:
     signature_file_counter = 0
 
     for page_coordinates in self.pages:
+      self.findElementByXPath(driver, '/html/body/div[1]/div/div/div[2]/div[2]').click()
+      time.sleep(1)
+      signer_selection = self.findElementByXPath(driver, f"/html/body/div[1]/div/div/div[2]/div[2]/ul/li/span[contains(text(), '{page_coordinates['type']}')]")
+      signer_selection.click()
+      time.sleep(1)
       if page_counter != page_coordinates['page']:
-        print('page_coordinates')
-        print(page_coordinates)
         page_no = page_coordinates['page']
         pager = self.findElementByXPath(driver, f'//*[@id="root"]/div/div/div[3]/div[2]/div/div/div/div/div[@id="page-{page_no}"]/div/div/img')
         print('pager_pager_pager')
@@ -179,8 +184,8 @@ class SeleniumAutomate:
         bounds = driver.execute_script(f"return document.evaluate('//*[@id=\"page-{page_no}\"]/div/div/img', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.getBoundingClientRect()")
         
 
-      xOffset = page_coordinates['x'] * bounds['width']
-      yOffset = page_coordinates['y'] * bounds['height']
+      xOffset = page_coordinates['x']
+      yOffset = page_coordinates['y']
 
       print(f'Boundsss:::::::   {bounds}')
       print(f'xOffsetxOffset----     {xOffset}')
@@ -220,19 +225,14 @@ class SeleniumAutomate:
       
       page_counter = page_coordinates['page']
       
-    # driver.switch_to.parent_frame()
-    # next_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div/nav/div[2]/button[2]')
-    # next_btn.click()
+    driver.switch_to.parent_frame()
+    next_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div/nav/div[2]/button[2]')
+    next_btn.click()
 
-    # document_sender_first_name = self.findElementByXPath(driver, '//*[@id="document.firstname"]')
-    # document_sender_first_name.send_keys(self.docs['sender_first_name'])
 
-    # document_sender_last_name = self.findElementByXPath(driver, '//*[@id="document.lastname"]')
-    # document_sender_last_name.send_keys(self.docs['sender_last_name'])
+    document_title = self.findElementByXPath(driver, '//*[@id="document.title"]')
+    document_title.send_keys(self.docs['document_title'])
 
-    # document_title = self.findElementByXPath(driver, '//*[@id="document.title"]')
-    # document_title.send_keys(self.docs['document_title'])
-
-    # send_signature_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[2]/nav/div[2]/button[2]')
-    # send_signature_btn.click()
-    # driver.quit()
+    send_signature_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[2]/nav/div[2]/button[2]')
+    send_signature_btn.click()
+    driver.quit()
