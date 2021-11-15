@@ -74,9 +74,9 @@ class SeleniumAutomate:
     element = driver.find_element_by_xpath(element)
     return element
 
-  def waitElement(self, driver, path, attempts = 2):
+  def waitElement(self, driver, path, attempts = 2, wait_time = 10):
     try:
-        return WebDriverWait(driver, 10).until(
+        return WebDriverWait(driver, wait_time).until(
             EC.presence_of_element_located((By.XPATH, path))
         )
     except Exception as inst:
@@ -100,14 +100,14 @@ class SeleniumAutomate:
   def login(self, driver):
     email_addresss = self.findElementByXPath(driver, '/html/body/div[3]/div/div[3]/div[2]/div[1]/form/div[1]/input')
     email_addresss.clear()
-    email_addresss.send_keys("vogige4845@fretice.com")
+    email_addresss.send_keys(self.user_name)
     time.sleep(1)
     continue_button = self.findElementByXPath(driver, '/html/body/div[3]/div/div[3]/div[2]/div[1]/form/div[3]/div[2]/button')
     continue_button.click()
     time.sleep(1)
     password_ = self.findElementByXPath(driver, '/html/body/div[3]/div/div[3]/div[2]/div[1]/form/div[2]/input')
     password_.clear()
-    password_.send_keys('devpass123')
+    password_.send_keys(self.password)
     time.sleep(1)
     login_button = self.findElementByXPath(driver, '/html/body/div[3]/div/div[3]/div[2]/div[1]/form/div[4]/div[2]/button')
     login_button.click()
@@ -118,7 +118,7 @@ class SeleniumAutomate:
     sign_doc_btn = self.findElementByXPath(driver, '//*[@id="site-wrapper"]/main/div/div[2]/div/a[1]')
     sign_doc_btn.click()
 
-    hasModalQuota = self.waitElement(driver, '/html/body/div[10]/div/div/div[@class="hello-modal"]')
+    hasModalQuota = self.waitElement(driver, '/html/body/div[10]/div/div/div[@class="hello-modal"]', 1, wait_time = 2)
     print('hasModalQuotahasModalQuotahasModalQuotahasModalQuota')
     print(hasModalQuota)
     if (type(hasModalQuota) is element):
