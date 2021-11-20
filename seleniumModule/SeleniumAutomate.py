@@ -161,11 +161,12 @@ class SeleniumAutomate:
 
   def finalStep(self, driver):
     page_counter = None
-    bounds = None
     xOffset = None
     yOffset = None
     img_page = None
     signature_file_counter = 0
+
+    time.sleep(60)
 
     for page_coordinates in self.pages:
       self.findElementByXPath(driver, '/html/body/div[1]/div/div/div[2]/div[2]').click()
@@ -181,58 +182,61 @@ class SeleniumAutomate:
         pager.click()
         time.sleep(2)
         img_page = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div/img')
-        bounds = driver.execute_script(f"return document.evaluate('//*[@id=\"page-{page_no}\"]/div/div/img', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue.getBoundingClientRect()")
         
 
       xOffset = page_coordinates['x']
       yOffset = page_coordinates['y']
-
-      print(f'Boundsss:::::::   {bounds}')
-      print(f'xOffsetxOffset----     {xOffset}')
-      print(f'yOffsetyOffset----     {yOffset}')
-
-      # if page_counter == 1:
       action = ActionChains(driver)
-      action.move_to_element_with_offset(img_page, xOffset, yOffset).click().perform()
-      signature_file_counter = signature_file_counter + 1
 
-      time.sleep(2)
-      print('setting bullet adjustment->->->->->->')
-      # setting bullet adjustment
-      signature_bullet = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div[@data-field="Signature{signature_file_counter}"]/div/div/div/div[4]')
-      signature_bullet_inner = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div[@data-field="Signature{signature_file_counter}"]/div/div/div/div[4]/div')
-      print(signature_bullet)
-      action = self.removeAction(action)
-      action.move_to_element(signature_bullet)
-      action.click_and_hold()
-      action.move_to_element_with_offset(signature_bullet, page_coordinates['w'], page_coordinates['h'])
-
-      try:
-        print('click_sigmatire bullet initiate!')
-        action.click(signature_bullet_inner)
-        action.perform()
-      except Exception as inst:
-        print('Error while clicking!!')
+      if (page_coordinates['field_type'] == 'date'):
+        self.findElementByXPath(driver, '/html/body/div[1]/div/div/div[2]/div[7]/button').click()
+        time.sleep(1)
+        action.move_to_element_with_offset(img_page, xOffset, yOffset).click().perform()
         action = self.removeAction(action)
-        action.release()
-        action.perform()
+        action.click(img_page)
+        action = self.removeAction(action)
 
-      # 
-      # time.sleep(1)
+      else:
+        # begin signature box placement
+        self.findElementByXPath(driver, '/html/body/div[1]/div/div/div[2]/div[4]/button').click()
+        action.move_to_element_with_offset(img_page, xOffset, yOffset).click().perform()
+        signature_file_counter = signature_file_counter + 1
+
+        time.sleep(2)
+        print('setting bullet adjustment->->->->->->')
+        signature_bullet = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div[@data-field="Signature{signature_file_counter}"]/div/div/div/div[4]')
+        signature_bullet_inner = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div[@data-field="Signature{signature_file_counter}"]/div/div/div/div[4]/div')
+        print(signature_bullet)
+        action = self.removeAction(action)
+        action.move_to_element(signature_bullet)
+        action.click_and_hold()
+        action.move_to_element_with_offset(signature_bullet, page_coordinates['w'], page_coordinates['h'])
+
+        try:
+          print('click_sigmatire bullet initiate!')
+          action.click(signature_bullet_inner)
+          action.perform()
+        except Exception as inst:
+          print('Error while clicking!!')
+          action = self.removeAction(action)
+          action.release()
+          action.perform()
+
+
       action.reset_actions()
       action.move_to_element_with_offset(img_page, 5, 5).click().perform()
       self.removeAction(action)
       
       page_counter = page_coordinates['page']
       
-    driver.switch_to.parent_frame()
-    next_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div/nav/div[2]/button[2]')
-    next_btn.click()
+    # driver.switch_to.parent_frame()
+    # next_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div/nav/div[2]/button[2]')
+    # next_btn.click()
 
 
-    document_title = self.findElementByXPath(driver, '//*[@id="document.title"]')
-    document_title.send_keys(self.docs['document_title'])
+    # document_title = self.findElementByXPath(driver, '//*[@id="document.title"]')
+    # document_title.send_keys(self.docs['document_title'])
 
-    send_signature_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[2]/nav/div[2]/button[2]')
-    send_signature_btn.click()
-    driver.quit()
+    # send_signature_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[2]/nav/div[2]/button[2]')
+    # send_signature_btn.click()
+    # driver.quit()
