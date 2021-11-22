@@ -13,6 +13,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.webelement import FirefoxWebElement as element
 from dotenv import load_dotenv
 import json
+import platform
+
 class SeleniumAutomate:
 
   def __init__(self, pdf_path = '', pages = [], docs = {}):
@@ -33,7 +35,11 @@ class SeleniumAutomate:
     self.docs = docs
     dir = os.path.dirname(__file__)
     # chrome_driver_path = dir + "\chromedriver.exe"
-    chrome_driver_path = dir + "\geckodriver.exe"
+
+    if (platform.system() == 'Darwin'):
+      chrome_driver_path = dir + "/geckodriver"
+    else:
+      chrome_driver_path = dir + "\geckodriver.exe"
     driver = webdriver.Firefox(options = self.chromeOptions(), executable_path = chrome_driver_path)
     driver.maximize_window()
     driver.implicitly_wait(30)
@@ -86,6 +92,18 @@ class SeleniumAutomate:
             self.waitElement(driver, path, n)
         return False
 
+  def waitModalElement(self, driver, path, attempts = 2, wait_time = 10):
+    try:
+        return WebDriverWait(driver, wait_time).until(
+            EC.presence_of_element_located((By.XPATH, path))
+        )
+    except Exception as inst:
+        if attempts:
+            time.sleep(2)
+            n = attempts-1
+            self.waitElement(driver, path, n)
+        return False
+
   def chromeOptions(self):
     options = Options()
     options.add_argument('--webdriver-active')
@@ -118,7 +136,7 @@ class SeleniumAutomate:
     sign_doc_btn = self.findElementByXPath(driver, '//*[@id="site-wrapper"]/main/div/div[2]/div/a[1]')
     sign_doc_btn.click()
 
-    # hasModalQuota = self.waitElement(driver, '/html/body/div[10]/div/div/div[@class="hello-modal"]', 1, wait_time = 2)
+    # hasModalQuota = self.waitElement(driver, '/html/body/div[10]/div/div/div[@class="hello-modal"]', attempts = 0, wait_time = 0)
     # print('hasModalQuotahasModalQuotahasModalQuotahasModalQuota')
     # print(hasModalQuota)
     # if (type(hasModalQuota) is element):
@@ -166,21 +184,21 @@ class SeleniumAutomate:
     img_page = None
     signature_file_counter = 0
 
-    time.sleep(60)
+    # time.sleep(1)
 
     for page_coordinates in self.pages:
       self.findElementByXPath(driver, '/html/body/div[1]/div/div/div[2]/div[2]').click()
       time.sleep(1)
       signer_selection = self.findElementByXPath(driver, f"/html/body/div[1]/div/div/div[2]/div[2]/ul/li/span[contains(text(), '{page_coordinates['type']}')]")
       signer_selection.click()
-      time.sleep(1)
+      # time.sleep(1)
       if page_counter != page_coordinates['page']:
         page_no = page_coordinates['page']
         pager = self.findElementByXPath(driver, f'//*[@id="root"]/div/div/div[3]/div[2]/div/div/div/div/div[@id="page-{page_no}"]/div/div/img')
         print('pager_pager_pager')
         print(pager)
         pager.click()
-        time.sleep(2)
+        # time.sleep(2)
         img_page = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div/img')
         
 
@@ -190,7 +208,7 @@ class SeleniumAutomate:
 
       if (page_coordinates['field_type'] == 'date'):
         self.findElementByXPath(driver, '/html/body/div[1]/div/div/div[2]/div[7]/button').click()
-        time.sleep(1)
+        # time.sleep(1)
         action.move_to_element_with_offset(img_page, xOffset, yOffset).click().perform()
         action = self.removeAction(action)
         action.click(img_page)
@@ -202,7 +220,7 @@ class SeleniumAutomate:
         action.move_to_element_with_offset(img_page, xOffset, yOffset).click().perform()
         signature_file_counter = signature_file_counter + 1
 
-        time.sleep(2)
+        # time.sleep(2)
         print('setting bullet adjustment->->->->->->')
         signature_bullet = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div[@data-field="Signature{signature_file_counter}"]/div/div/div/div[4]')
         signature_bullet_inner = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div[@data-field="Signature{signature_file_counter}"]/div/div/div/div[4]/div')
@@ -229,14 +247,14 @@ class SeleniumAutomate:
       
       page_counter = page_coordinates['page']
       
-    # driver.switch_to.parent_frame()
-    # next_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div/nav/div[2]/button[2]')
-    # next_btn.click()
+    driver.switch_to.parent_frame()
+    next_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div/nav/div[2]/button[2]')
+    next_btn.click()
 
 
-    # document_title = self.findElementByXPath(driver, '//*[@id="document.title"]')
-    # document_title.send_keys(self.docs['document_title'])
+    document_title = self.findElementByXPath(driver, '//*[@id="document.title"]')
+    document_title.send_keys(self.docs['document_title'])
 
-    # send_signature_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[2]/nav/div[2]/button[2]')
-    # send_signature_btn.click()
-    # driver.quit()
+    send_signature_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[2]/nav/div[2]/button[2]')
+    send_signature_btn.click()
+    driver.quit()
