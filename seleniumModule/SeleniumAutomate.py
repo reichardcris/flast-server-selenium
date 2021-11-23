@@ -107,6 +107,7 @@ class SeleniumAutomate:
   def chromeOptions(self):
     options = Options()
     options.add_argument('--webdriver-active')
+    options.add_argument('--headless')
     # options.add_argument("--start-maximized")
     # options.add_argument("--disable-blink-features")
     # options.add_argument('--disable-blink-features=AutomationControlled')
