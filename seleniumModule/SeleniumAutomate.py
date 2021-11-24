@@ -18,7 +18,7 @@ import platform
 class SeleniumAutomate:
 
   def __init__(self, pdf_path = '', pages = [], docs = {}):
-    print("__INIT__ PDF PATH")
+    print("initiating credentials...")
     load_dotenv()
 
     # user creds
@@ -34,7 +34,6 @@ class SeleniumAutomate:
     self.pages = pages
     self.docs = docs
     dir = os.path.dirname(__file__)
-    # chrome_driver_path = dir + "\chromedriver.exe"
 
     if (platform.system() == 'Darwin'):
       chrome_driver_path = dir + "/geckodriver"
@@ -45,6 +44,7 @@ class SeleniumAutomate:
     driver.implicitly_wait(30)
     # driver.execute_cdp_cmd('Network.setUserAgentOverride', {"userAgent": 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36'})
     driver.get('https://app.hellosign.com/account/logIn')
+    print("Starting The Browser...")
 
 
     self.login(driver)
@@ -130,9 +130,11 @@ class SeleniumAutomate:
     time.sleep(1)
     login_button = self.findElementByXPath(driver, '/html/body/div[3]/div/div[3]/div[2]/div[1]/form/div[4]/div[2]/button')
     login_button.click()
+    print("Login!...")
 
   # Procedure uploading
   def uploadFile(self, driver):
+    print("initiating upload document...")
     time.sleep(3)
     sign_doc_btn = self.findElementByXPath(driver, '//*[@id="site-wrapper"]/main/div/div[2]/div/a[1]')
     sign_doc_btn.click()
@@ -153,6 +155,7 @@ class SeleniumAutomate:
 
   # Recipient Stage
   def addRecipient(self, driver):
+    print("initiating Recipient Details...")
     for index, val in enumerate(json.loads(self.docs['recepient'])):
       if (index > 0):
         time.sleep(1)
@@ -172,13 +175,13 @@ class SeleniumAutomate:
   
   def removeAction(self, action):
     for device in action.w3c_actions.devices:
-      print('Removing ACtions!!')
       device.clear_actions()
     
     return action
 
 
   def finalStep(self, driver):
+    print("initiating signature boxes and dates...")
     page_counter = None
     xOffset = None
     yOffset = None
@@ -259,3 +262,4 @@ class SeleniumAutomate:
     send_signature_btn = self.findElementByXPath(driver, '//*[@id="root"]/div/div[2]/div[1]/div[2]/nav/div[2]/button[2]')
     send_signature_btn.click()
     driver.quit()
+    print("Done!")
