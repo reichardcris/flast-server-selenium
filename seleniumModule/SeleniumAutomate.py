@@ -199,8 +199,6 @@ class SeleniumAutomate:
       if page_counter != page_coordinates['page']:
         page_no = page_coordinates['page']
         pager = self.findElementByXPath(driver, f'//*[@id="root"]/div/div/div[3]/div[2]/div/div/div/div/div[@id="page-{page_no}"]/div/div/img')
-        print('pager_pager_pager')
-        print(pager)
         pager.click()
         # time.sleep(2)
         img_page = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div/img')
@@ -228,7 +226,6 @@ class SeleniumAutomate:
         print('setting bullet adjustment->->->->->->')
         signature_bullet = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div[@data-field="Signature{signature_file_counter}"]/div/div/div/div[4]')
         signature_bullet_inner = self.findElementByXPath(driver, f'//*[@id="page-{page_no}"]/div/div[@data-field="Signature{signature_file_counter}"]/div/div/div/div[4]/div')
-        print(signature_bullet)
         action = self.removeAction(action)
         action.move_to_element(signature_bullet)
         action.click_and_hold()
