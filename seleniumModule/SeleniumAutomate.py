@@ -9,8 +9,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-# from selenium.webdriver.remote.webelement import WebElement as element
-from selenium.webdriver.firefox.webelement import FirefoxWebElement as element
+from selenium.webdriver.remote.webelement import WebElement as element
+# from selenium.webdriver.firefox.webelement import FirefoxWebElement as element
 from dotenv import load_dotenv
 import json
 import platform
@@ -40,6 +40,7 @@ class SeleniumAutomate:
       chrome_driver_path = dir + "/geckodriver"
     else:
       chrome_driver_path = dir + "\geckodriver.exe"
+
     driver = webdriver.Firefox(options = self.chromeOptions(), executable_path = chrome_driver_path)
     driver.maximize_window()
     driver.implicitly_wait(30)
@@ -116,14 +117,14 @@ class SeleniumAutomate:
 
   # Login System
   def login(self, driver):
-    email_addresss = self.findElementByXPath(driver, '/html/body/div[3]/div/div[3]/div[2]/div[1]/form/div[1]/input')
+    email_addresss = self.findElementByXPath(driver, '//input[@type="email"]')
     email_addresss.clear()
     email_addresss.send_keys(self.user_name)
     time.sleep(1)
     continue_button = self.findElementByXPath(driver, '/html/body/div[3]/div/div[3]/div[2]/div[1]/form/div[3]/div[2]/button')
     continue_button.click()
     time.sleep(1)
-    password_ = self.findElementByXPath(driver, '/html/body/div[3]/div/div[3]/div[2]/div[1]/form/div[2]/input')
+    password_ = self.findElementByXPath(driver, '//input[@type="password"]')
     password_.clear()
     password_.send_keys(self.password)
     time.sleep(1)
@@ -133,7 +134,7 @@ class SeleniumAutomate:
   # Procedure uploading
   def uploadFile(self, driver):
     time.sleep(3)
-    sign_doc_btn = self.findElementByXPath(driver, '//*[@id="site-wrapper"]/main/div/div[2]/div/a[1]')
+    sign_doc_btn = self.findElementByXPath(driver, '//div[text()="Sign Or Send"]')
     sign_doc_btn.click()
 
     # hasModalQuota = self.waitElement(driver, '/html/body/div[10]/div/div/div[@class="hello-modal"]', attempts = 0, wait_time = 0)
